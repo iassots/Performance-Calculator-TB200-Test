@@ -13,7 +13,7 @@
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
-  <p>Version 1.3</p>
+  <p>Version 1.4</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
       <input
@@ -118,6 +118,7 @@
       const fieldElevation =
         parseFloat(document.getElementById('fieldElevation').value) || 0;
       const pressureAltitude = (1013 - qnh) * 28 + fieldElevation;
+      const pressureAltitudeKft = pressureAltitude / 1000;
       const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
       const windDirection =
         parseFloat(document.getElementById('windDirection').value) || 0;
@@ -147,22 +148,22 @@
       ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
 
       const rollMinus20 =
-        0.0000000011 * Math.pow(pressureAltitude, 4) -
-        0.0000017 * Math.pow(pressureAltitude, 3) +
-        0.0000755 * Math.pow(pressureAltitude, 2) +
-        0.0129 * pressureAltitude +
+        0.0000000011 * Math.pow(pressureAltitudeKft, 4) -
+        0.0000017 * Math.pow(pressureAltitudeKft, 3) +
+        0.0000755 * Math.pow(pressureAltitudeKft, 2) +
+        0.0129 * pressureAltitudeKft +
         245;
       const roll0 =
-        -0.00000015 * Math.pow(pressureAltitude, 4) +
-        0.0000113 * Math.pow(pressureAltitude, 3) -
-        0.000187 * Math.pow(pressureAltitude, 2) +
-        0.0248 * pressureAltitude +
+        -0.00000015 * Math.pow(pressureAltitudeKft, 4) +
+        0.0000113 * Math.pow(pressureAltitudeKft, 3) -
+        0.000187 * Math.pow(pressureAltitudeKft, 2) +
+        0.0248 * pressureAltitudeKft +
         290;
       const rollPlus20 =
-        -0.00000034 * Math.pow(pressureAltitude, 4) +
-        0.000055 * Math.pow(pressureAltitude, 3) -
-        0.000411 * Math.pow(pressureAltitude, 2) +
-        0.0319 * pressureAltitude +
+        -0.00000034 * Math.pow(pressureAltitudeKft, 4) +
+        0.000055 * Math.pow(pressureAltitudeKft, 3) -
+        0.000411 * Math.pow(pressureAltitudeKft, 2) +
+        0.0319 * pressureAltitudeKft +
         340;
       document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
       document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
