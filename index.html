@@ -94,7 +94,22 @@
   </div>
 
   <script>
+    const perfForm = document.getElementById('perfForm');
+    perfForm.querySelectorAll('input[type="number"]').forEach((input) => {
+      input.addEventListener('input', function () {
+        const min = parseFloat(this.min);
+        const max = parseFloat(this.max);
+        let value = parseFloat(this.value);
+        if (!isNaN(min) && value < min) this.value = min;
+        if (!isNaN(max) && value > max) this.value = max;
+      });
+    });
+
     document.getElementById('calcBtn').addEventListener('click', function () {
+      if (!perfForm.checkValidity()) {
+        perfForm.reportValidity();
+        return;
+      }
       const temperature = parseFloat(document.getElementById('temperature').value) || 0;
       const qnh = parseFloat(document.getElementById('qnh').value) || 0;
       const fieldElevation =
@@ -119,23 +134,3 @@
       document.getElementById(
         'calcPressureAltitude'
       ).textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
-
-      const distanceISA0 =
-        0.000001339 * pressureAltitude * pressureAltitude +
-        0.01854 * pressureAltitude +
-        290.7;
-      document.getElementById(
-        'distancePressureAltitude'
-      ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
-
-      const result = document.getElementById('result');
-      result.textContent = 'Berechnung abgeschlossen.';
-    });
-
-    document.getElementById('detailsBtn').addEventListener('click', function () {
-      const details = document.getElementById('details');
-      details.style.display = details.style.display === 'none' ? 'block' : 'none';
-    });
-  </script>
-</body>
-</html>
