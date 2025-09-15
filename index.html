@@ -61,8 +61,31 @@
 
   <script>
     document.getElementById('calcBtn').addEventListener('click', function () {
+      const temperature = parseFloat(document.getElementById('temperature').value) || 0;
+      const pressureAltitude = parseFloat(
+        document.getElementById('pressureAltitude').value
+      ) || 0;
+      const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
+      const windDirection = parseFloat(
+        document.getElementById('windDirection').value
+      ) || 0;
+      const runwayHeading = parseFloat(
+        document.getElementById('runwayHeading').value
+      ) || 0;
+
+      const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
+      const windComponent =
+        Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
+
+      document.getElementById(
+        'isaDeviation'
+      ).textContent = `ISA Abweichung: ${isaDeviation.toFixed(2)} \u00B0C`;
+      document.getElementById(
+        'windComponent'
+      ).textContent = `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
+
       const result = document.getElementById('result');
-      result.textContent = 'Berechnungslogik wird noch hinzugefügt.';
+      result.textContent = 'Berechnung abgeschlossen.';
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
