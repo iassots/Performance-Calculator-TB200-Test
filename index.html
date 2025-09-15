@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Calculator TB200</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Performance Calculator TB200</h1>
+  <form id="performance-form">
+    <label>QNH
+      <input type="number" id="qnh" name="qnh" step="0.01" required />
+    </label>
 
+    <label>Temperatur (°C)
+      <input type="number" id="temperature" name="temperature" step="0.1" required />
+    </label>
+
+    <label>Windgeschwindigkeit (kt)
+      <input type="number" id="windSpeed" name="windSpeed" step="0.1" required />
+    </label>
+
+    <label>Windrichtung (°)
+      <input type="number" id="windDirection" name="windDirection" step="1" min="0" max="360" required />
+    </label>
+
+    <label>Untergrund
+      <select id="surface" name="surface">
+        <option value="grass">Gras</option>
+        <option value="asphalt">Asphalt</option>
+        <option value="concrete">Beton</option>
+      </select>
+    </label>
+
+    <label>Pistenausrichtung (°)
+      <input type="number" id="runwayHeading" name="runwayHeading" step="1" min="0" max="360" required />
+    </label>
+
+    <label>Flugplatzhöhe (ft)
+      <input type="number" id="fieldElevation" name="fieldElevation" step="1" required />
+    </label>
+
+    <label>Druckhöhe (ft)
+      <input type="number" id="pressureAltitude" name="pressureAltitude" step="1" required />
+    </label>
+
+    <button type="submit">Berechnen</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('performance-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      // TODO: Add calculation formula when available
+      document.getElementById('result').textContent = 'Berechnung folgt...';
+    });
+  </script>
+</body>
+</html>
