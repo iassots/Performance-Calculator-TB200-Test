@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TB200 Performance Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    label { display: block; margin-top: 1rem; }
+    input, select { width: 200px; }
+    #result { margin-top: 2rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>TB200 Performance Calculator</h1>
+  <form id="perfForm">
+    <label for="qnh">QNH (hPa)</label>
+    <input type="number" id="qnh" name="qnh" />
 
+    <label for="temperature">Temperatur (°C)</label>
+    <input type="number" id="temperature" name="temperature" />
+
+    <label for="windSpeed">Windgeschwindigkeit (kt)</label>
+    <input type="number" id="windSpeed" name="windSpeed" />
+
+    <label for="windDirection">Windrichtung (°)</label>
+    <input type="number" id="windDirection" name="windDirection" />
+
+    <label for="surface">Pistenoberfläche</label>
+    <select id="surface" name="surface">
+      <option value="grass">Gras</option>
+      <option value="asphalt">Asphalt</option>
+      <option value="concrete">Beton</option>
+    </select>
+
+    <label for="runwayHeading">Pistenausrichtung (°)</label>
+    <input type="number" id="runwayHeading" name="runwayHeading" />
+
+    <label for="fieldElevation">Flugplatzhöhe (ft)</label>
+    <input type="number" id="fieldElevation" name="fieldElevation" />
+
+    <label for="pressureAltitude">Druckhöhe (ft)</label>
+    <input type="number" id="pressureAltitude" name="pressureAltitude" />
+
+    <button type="button" id="calcBtn">Berechnen</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('calcBtn').addEventListener('click', function () {
+      const result = document.getElementById('result');
+      result.textContent = 'Berechnungslogik wird noch hinzugefügt.';
+    });
+  </script>
+</body>
+</html>
