@@ -56,6 +56,7 @@
     <p id="isaDeviation">ISA Abweichung: --</p>
     <p id="windComponent">Head/Tailwind Komponente: --</p>
     <p id="calcPressureAltitude">Druckhöhe: --</p>
+    <p id="distancePressureAltitude">Strecke nach Druckhöhe (ISA=0): --</p>
   </div>
 
   <script>
@@ -84,6 +85,14 @@
       document.getElementById(
         'calcPressureAltitude'
       ).textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
+
+      const distanceISA0 =
+        0.000001339 * pressureAltitude * pressureAltitude +
+        0.01854 * pressureAltitude +
+        290.7;
+      document.getElementById(
+        'distancePressureAltitude'
+      ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
