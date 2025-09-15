@@ -13,6 +13,7 @@
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
+  <p>Version 1.1</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
     <input type="number" id="qnh" name="qnh" value="1013" />
@@ -45,9 +46,6 @@
     <label for="fieldElevation">Flugplatzhöhe (ft)</label>
     <input type="number" id="fieldElevation" name="fieldElevation" value="1535" />
 
-    <label for="pressureAltitude">Druckhöhe (ft)</label>
-    <input type="number" id="pressureAltitude" name="pressureAltitude" />
-
     <button type="button" id="calcBtn">Berechnen</button>
     <button type="button" id="detailsBtn">Detaillierte Berechnung</button>
   </form>
@@ -57,21 +55,21 @@
   <div id="details" style="display: none;">
     <p id="isaDeviation">ISA Abweichung: --</p>
     <p id="windComponent">Head/Tailwind Komponente: --</p>
+    <p id="calcPressureAltitude">Druckhöhe: --</p>
   </div>
 
   <script>
     document.getElementById('calcBtn').addEventListener('click', function () {
       const temperature = parseFloat(document.getElementById('temperature').value) || 0;
-      const pressureAltitude = parseFloat(
-        document.getElementById('pressureAltitude').value
-      ) || 0;
+      const qnh = parseFloat(document.getElementById('qnh').value) || 0;
+      const fieldElevation =
+        parseFloat(document.getElementById('fieldElevation').value) || 0;
+      const pressureAltitude = (1013 - qnh) * 28 + fieldElevation;
       const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
-      const windDirection = parseFloat(
-        document.getElementById('windDirection').value
-      ) || 0;
-      const runwayHeading = parseFloat(
-        document.getElementById('runwayHeading').value
-      ) || 0;
+      const windDirection =
+        parseFloat(document.getElementById('windDirection').value) || 0;
+      const runwayHeading =
+        parseFloat(document.getElementById('runwayHeading').value) || 0;
 
       const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
       const windComponent =
@@ -83,6 +81,9 @@
       document.getElementById(
         'windComponent'
       ).textContent = `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
+      document.getElementById(
+        'calcPressureAltitude'
+      ).textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
