@@ -66,7 +66,7 @@
         id="runwayHeading"
         name="runwayHeading"
         value="55"
-               min="0"
+                       min="0"
         max="360"
       />
 
@@ -118,7 +118,6 @@
       const fieldElevation =
         parseFloat(document.getElementById('fieldElevation').value) || 0;
       const pressureAltitude = (1013 - qnh) * 28 + fieldElevation;
-      const pressureAlt = pressureAltitude / 1000;
       const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
       const windDirection =
         parseFloat(document.getElementById('windDirection').value) || 0;
@@ -148,23 +147,23 @@
       ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
 
       const rollMinus20 =
-        0.00002604166666666667 * Math.pow(pressureAlt, 4) -
-        0.0004166666666666667 * Math.pow(pressureAlt, 3) +
-        0.0030208333333333333 * Math.pow(pressureAlt, 2) +
-        0.012916666666666667 * pressureAlt +
-        0.245;
+        0.0000000000000260 * Math.pow(pressureAltitude, 4) -
+        0.0000000004166667 * Math.pow(pressureAltitude, 3) +
+        0.0000030208333333 * Math.pow(pressureAltitude, 2) +
+        0.0129166666666667 * pressureAltitude +
+        245.0000000000000000;
       const roll0 =
-        -0.0000390625 * Math.pow(pressureAlt, 4) +
-        0.0006770833333333334 * Math.pow(pressureAlt, 3) -
-        0.00234375 * Math.pow(pressureAlt, 2) +
-        0.024791666666666667 * pressureAlt +
-        0.290;
+        -0.0000000000000391 * Math.pow(pressureAltitude, 4) +
+        0.0000000006770833 * Math.pow(pressureAltitude, 3) -
+        0.0000023437500000 * Math.pow(pressureAltitude, 2) +
+        0.0247916666666667 * pressureAltitude +
+        290.0000000000000000;
       const rollPlus20 =
-        -0.00006510416666666667 * Math.pow(pressureAlt, 4) +
-        0.00109375 * Math.pow(pressureAlt, 3) -
-        0.004114583333333333 * Math.pow(pressureAlt, 2) +
-        0.031875 * pressureAlt +
-        0.340;
+        -0.0000000000000651 * Math.pow(pressureAltitude, 4) +
+        0.0000000010937500 * Math.pow(pressureAltitude, 3) -
+        0.0000041145833333 * Math.pow(pressureAltitude, 2) +
+        0.0318750000000000 * pressureAltitude +
+        340.0000000000000000;
       document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
       document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
       document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
