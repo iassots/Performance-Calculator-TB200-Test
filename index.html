@@ -66,7 +66,7 @@
         id="runwayHeading"
         name="runwayHeading"
         value="55"
-                       min="0"
+          min="0"
         max="360"
       />
 
@@ -94,6 +94,9 @@
     <p id="rollMinus20">Rollstrecke -20: --</p>
     <p id="roll0">Rollstrecke 0: --</p>
     <p id="rollPlus20">Rollstrecke +20: --</p>
+    <p id="wMinus20">w_m20: --</p>
+    <p id="w0">w_0: --</p>
+    <p id="wPlus20">w_p20: --</p>
   </div>
 
   <script>
@@ -145,6 +148,18 @@
       document.getElementById(
         'distancePressureAltitude'
       ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
+
+      const wMinus20 = (isaDeviation * (isaDeviation - 20)) / 800;
+      const w0 = (400 - Math.pow(isaDeviation, 2)) / 400;
+      const wPlus20 = (isaDeviation * (isaDeviation + 20)) / 800;
+
+      document.getElementById(
+        'wMinus20'
+      ).textContent = `w_m20: ${wMinus20.toFixed(4)}`;
+      document.getElementById('w0').textContent = `w_0: ${w0.toFixed(4)}`;
+      document.getElementById(
+        'wPlus20'
+      ).textContent = `w_p20: ${wPlus20.toFixed(4)}`;
 
       const rollMinus20 =
         0.0000000000000260 * Math.pow(pressureAltitude, 4) -
