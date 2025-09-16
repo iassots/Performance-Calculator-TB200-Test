@@ -33,7 +33,7 @@
         value="15"
         min="-100"
         max="200"
-      />
+            />
 
     <label for="windSpeed">Windgeschwindigkeit (kt)</label>
       <input
@@ -58,6 +58,13 @@
       <option value="grass">Gras</option>
       <option value="asphalt">Asphalt</option>
       <option value="concrete">Beton</option>
+      <option value="hard-grass">Harter Rasen</option>
+      <option value="short-grass">Kurzes Gras</option>
+      <option value="long-grass">Hohes Gras</option>
+      <option value="short-wet-grass-firm">
+        Kurzes feuchtes Gras auf festem Gelände
+      </option>
+      <option value="loose-surface">Lockeres Gelände, Schlamm oder Schnee</option>
     </select>
 
     <label for="runwayHeading">Pistenausrichtung (°)</label>
@@ -66,7 +73,7 @@
         id="runwayHeading"
         name="runwayHeading"
         value="55"
-           min="0"
+        min="0"
         max="360"
       />
 
@@ -187,7 +194,7 @@
       const sRoll =
         wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
       document.getElementById('sRoll').textContent =
-        `S_Roll = ${sRoll.toFixed(2)} m`;
+        `S_Roll = w_m20 * Rollminus20 + w_0 * Roll0 + w_p20 * Rollplus20 = ${sRoll.toFixed(2)} m`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
