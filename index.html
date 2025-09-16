@@ -13,7 +13,7 @@
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
-  <p>Version 1.6</p>
+  <p>Version 1.7</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
       <input
@@ -229,11 +229,18 @@
       document.getElementById('surfaceDistance').textContent =
         `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
 
-      const rawWindMultiplier = 1 - windComponent * 0.01;
-      const windMultiplier = Math.max(0, rawWindMultiplier);
-      const windAdjustedDistance = sRoll * windMultiplier;
-      const windLabel = windComponent >= 0 ? 'Gegenwind' : 'Rückenwind';
-      const windComponentText = Math.abs(windComponent).toLocaleString('de-DE', {
+      const denominator = windComponent > 0 ? 5 : 2.5;
+      const denominatorText = windComponent > 0 ? '5' : '2,5';
+      const factor = windComponent > 0 ? 0.2 : 0.15;
+      const factorText = windComponent > 0 ? '0,2' : '0,15';
+      const windMultiplierRaw =
+        1 - ((windComponent / denominator) * factor);
+      const windMultiplier = Math.max(0, windMultiplierRaw);
+      const componentText = windComponent.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString('de-DE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
@@ -241,9 +248,20 @@
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-      const windNote = windMultiplier === rawWindMultiplier ? '' : ' (auf 0 begrenzt)';
+      const windAdjustedDistance = surfaceAdjustedDistance * windMultiplier;
+      const windAdjustedDistanceText = windAdjustedDistance.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const windNote = windMultiplier === windMultiplierRaw ? '' : ' (auf 0 begrenzt)';
+      const symbolicFormula =
+        windComponent > 0
+          ? 'Strecke nach Pistenart * (1 - ((Head/Tailwind Komponente / 5) * 0,2))'
+          : 'Strecke nach Pistenart * (1 - ((Head/Tailwind Komponente / 2,5) * 0,15))';
+      const resolvedFormula =
+        `Strecke nach Pistenart * (1 - ((${componentText} / ${denominatorText}) * ${factorText}))`;
       document.getElementById('windDistance').textContent =
-        `Strecke nach Wind: S_Roll * ${windMultiplierText} (${windLabel} ${windComponentText} kt) = ${windAdjustedDistance.toFixed(2)} m${windNote}`;
+        `Strecke nach Wind: ${symbolicFormula} = ${resolvedFormula} = ${surfaceDistanceText} m * ${windMultiplierText} = ${windAdjustedDistanceText} m${windNote}`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
