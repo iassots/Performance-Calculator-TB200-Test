@@ -66,7 +66,7 @@
         id="runwayHeading"
         name="runwayHeading"
         value="55"
-          min="0"
+           min="0"
         max="360"
       />
 
@@ -97,6 +97,7 @@
     <p id="wMinus20">w_m20: --</p>
     <p id="w0">w_0: --</p>
     <p id="wPlus20">w_p20: --</p>
+    <p id="sRoll">S_Roll: --</p>
   </div>
 
   <script>
@@ -182,6 +183,11 @@
       document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
       document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
       document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
+
+      const sRoll =
+        wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
+      document.getElementById('sRoll').textContent =
+        `S_Roll = w_m20 * Rollminus20 + w_0 * Roll0 + w_p20 * Rollplus20 = ${sRoll.toFixed(2)} m`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
