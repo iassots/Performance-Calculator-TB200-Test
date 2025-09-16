@@ -10,14 +10,14 @@
     input, select { width: 200px; }
     #result { margin-top: 2rem; font-weight: bold; }
 
-    /* --- nur für die Grafik --- */
-    #vizContainer { margin-top: 2rem; }
+    /* Nur für die Visualisierung */
+    #vizContainer { margin-top: 2rem; display: none; }
     #vizLabel { margin-top: .5rem; }
   </style>
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
-  <p>Version 1.8</p>
+  <p>Version 1.7</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
       <input
@@ -34,7 +34,7 @@
         type="number"
         id="temperature"
         name="temperature"
-       value="15"
+        value="15"
         min="-100"
         max="200"
       />
@@ -112,7 +112,7 @@
     <p id="windDistance">Strecke nach Wind: --</p>
   </div>
 
-  <!-- === NEU: Grafische Darstellung am Seitenende === -->
+  <!-- Grafische Darstellung (wird erst nach "Berechnen" eingeblendet) -->
   <div id="vizContainer" aria-live="polite">
     <h2>Grafische Darstellung</h2>
     <svg id="viz" viewBox="0 0 600 300" width="100%" height="300" aria-label="Windrichtung relativ zur Piste">
@@ -122,14 +122,14 @@
         <line x1="80" y1="15" x2="80" y2="245" stroke="black" stroke-width="4" stroke-dasharray="22 18" />
       </g>
 
-      <!-- Kreis mit Pfeil links von der Bahn -->
+      <!-- Kreis mit Pfeil links der Bahn -->
       <g id="windCompass" transform="translate(120,150)">
         <circle r="95" fill="none" stroke="black" stroke-width="4"/>
-        <!-- Pfeil: 0° zeigt nach rechts (zur Bahn) -->
+        <!-- Pfeil: Grundrichtung zeigt nach rechts -->
         <g id="windArrow" transform="rotate(0)">
-          <line x1="-55" y1="0" x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
-          <line x1="30" y1="-28" x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
-          <line x1="30" y1="28"  x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+          <line x1="-55" y1="0" x2="70"  y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+          <line x1="30"  y1="-28" x2="70"  y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+          <line x1="30"  y1="28"  x2="70"  y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
         </g>
       </g>
     </svg>
@@ -140,6 +140,7 @@
     const perfForm = document.getElementById('perfForm');
     const surfaceSelect = document.getElementById('surface');
 
+    // "Gras" aus der Auswahl entfernen
     Array.from(surfaceSelect.options).forEach((option) => {
       const optionText = option.textContent.trim().toLowerCase();
       if (option.value === 'grass' || optionText === 'gras') {
@@ -147,6 +148,7 @@
       }
     });
 
+    // Eingabewerte auf min/max clampen
     perfForm.querySelectorAll('input[type="number"]').forEach((input) => {
       input.addEventListener('input', function () {
         const min = parseFloat(this.min);
@@ -199,13 +201,9 @@
       const w0 = (400 - Math.pow(isaDeviation, 2)) / 400;
       const wPlus20 = (isaDeviation * (isaDeviation + 20)) / 800;
 
-      document.getElementById(
-        'wMinus20'
-      ).textContent = `w_m20: ${wMinus20.toFixed(4)}`;
+      document.getElementById('wMinus20').textContent = `w_m20: ${wMinus20.toFixed(4)}`;
       document.getElementById('w0').textContent = `w_0: ${w0.toFixed(4)}`;
-      document.getElementById(
-        'wPlus20'
-      ).textContent = `w_p20: ${wPlus20.toFixed(4)}`;
+      document.getElementById('wPlus20').textContent = `w_p20: ${wPlus20.toFixed(4)}`;
 
       const rollMinus20 =
         0.000000000000026 * Math.pow(pressureAltitude, 4) -
@@ -223,16 +221,15 @@
         -0.0000000000000651 * Math.pow(pressureAltitude, 4) +
         0.00000000109375 * Math.pow(pressureAltitude, 3) -
         0.0000041145833333 * Math.pow(pressureAltitude, 2) +
-        0.031875 * Math.pow(pressureAltitude, 1) +
+        0.031875 * pressureAltitude +
         340;
+
       document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
-      document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
+      document.getElementById('roll0').textContent   = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
       document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
 
-      const sRoll =
-        wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
-      document.getElementById('sRoll').textContent =
-        `S_Roll = ${sRoll.toFixed(2)} m`;
+      const sRoll = wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
+      document.getElementById('sRoll').textContent = `S_Roll = ${sRoll.toFixed(2)} m`;
 
       const surfaceElement = document.getElementById('surface');
       const surfaceValue = surfaceElement.value;
@@ -261,26 +258,13 @@
       const denominatorText = windComponent > 0 ? '5' : '2,5';
       const factor = windComponent > 0 ? 0.2 : 0.15;
       const factorText = windComponent > 0 ? '0,2' : '0,15';
-      const windMultiplierRaw =
-        1 - ((windComponent / denominator) * factor);
+      const windMultiplierRaw = 1 - ((windComponent / denominator) * factor);
       const windMultiplier = Math.max(0, windMultiplierRaw);
-      const componentText = windComponent.toLocaleString('de-DE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-      const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString('de-DE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-      const windMultiplierText = windMultiplier.toLocaleString('de-DE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+      const componentText = windComponent.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const windMultiplierText = windMultiplier.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const windAdjustedDistance = surfaceAdjustedDistance * windMultiplier;
-      const windAdjustedDistanceText = windAdjustedDistance.toLocaleString('de-DE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+      const windAdjustedDistanceText = windAdjustedDistance.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const windNote = windMultiplier === windMultiplierRaw ? '' : ' (auf 0 begrenzt)';
       const symbolicFormula =
         windComponent > 0
@@ -294,7 +278,8 @@
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
 
-      /* === NEU: Visualisierung nach der Berechnung aktualisieren === */
+      /* Visualisierung erst jetzt anzeigen & aktualisieren */
+      document.getElementById('vizContainer').style.display = 'block';
       updateVisualization(windDirection, runwayHeading);
     });
 
@@ -303,18 +288,17 @@
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
     });
 
-    /* === NEU: Hilfsfunktionen für die Visualisierung === */
+    /* Hilfsfunktionen für die Visualisierung */
     function normalizeAngle(deg) {
-      // Ergebnis in [0, 360)
-      return ((deg % 360) + 360) % 360;
+      return ((deg % 360) + 360) % 360; // [0,360)
     }
 
-    // Windpfeil relativ zur Pistenausrichtung (Differenz) drehen
+    // Pfeil zeigt die Differenz: 0° -> unten, 180° -> oben
     function updateVisualization(windDirDeg, rwyDeg) {
-      const rel = normalizeAngle(windDirDeg - rwyDeg); // Pfeilrichtung relativ zur Piste
+      const rel = normalizeAngle(windDirDeg - rwyDeg);
       const arrow = document.getElementById('windArrow');
       if (arrow) {
-        // 0° zeigt nach rechts Richtung Bahn; positive Werte im Uhrzeigersinn
+        // +90° Offset: 0° (rechts) -> unten, 180° -> oben
         arrow.setAttribute('transform', `rotate(${(rel + 90) % 360})`);
       }
       const label = document.getElementById('vizLabel');
@@ -322,12 +306,6 @@
         label.textContent = `Wind relativ zur Pistenachse: ${rel.toFixed(0)}° (Wind ${normalizeAngle(windDirDeg)}°, Piste ${normalizeAngle(rwyDeg)}°)`;
       }
     }
-
-    // Initiale Darstellung (falls der Nutzer direkt scrollt)
-    updateVisualization(
-      parseFloat(document.getElementById('windDirection').value) || 0,
-      parseFloat(document.getElementById('runwayHeading').value) || 0
-    );
   </script>
 </body>
 </html>
