@@ -33,7 +33,7 @@
         value="15"
         min="-100"
         max="200"
-         />
+      />
 
     <label for="windSpeed">Windgeschwindigkeit (kt)</label>
       <input
@@ -194,7 +194,7 @@
       const sRoll =
         wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
       document.getElementById('sRoll').textContent =
-        `S_Roll = w_m20 * Rollminus20 + w_0 * Roll0 + w_p20 * Rollplus20 = ${sRoll.toFixed(2)} m`;
+        `S_Roll = ${sRoll.toFixed(2)} m`;
 
       const surfaceElement = document.getElementById('surface');
       const surfaceValue = surfaceElement.value;
