@@ -10,7 +10,7 @@
     input, select { width: 200px; }
     #result { margin-top: 2rem; font-weight: bold; }
 
-    /* Unterer Bereich wie im Screenshot */
+    /* Unterer Bereich */
     #bottomLayout {
       display: none;            /* erst nach Berechnung sichtbar */
       margin-top: 2rem;
@@ -28,7 +28,6 @@
       font-weight: 700;
       margin: 0;
     }
-    #rollOutput span#rollValue { font-weight: 700; }
 
     /* Visualisierung (rechts) */
     #vizContainer { width: 600px; max-width: 100%; }
@@ -102,21 +101,19 @@
     </div>
 
     <div id="vizContainer">
+      <!-- Standard-ViewBox; wird dynamisch nach oben erweitert, falls nötig -->
       <svg id="viz" viewBox="0 0 600 300" width="100%" height="300" aria-label="Windrichtung relativ zur Piste">
         <!-- Landebahn (schmaler & länger, mittig mit Kreis weiter links) -->
-        <!-- Neu: schmaler (110), länger (300), weiter nach links (x=330) -->
         <g id="runway" transform="translate(330,0)">
           <rect x="0" y="0" width="110" height="300" fill="white" stroke="black" stroke-width="3"/>
           <line x1="55" y1="10" x2="55" y2="290" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
-          <!-- Rote Linie: wird per JS vertikal positioniert -->
+          <!-- Rote Linie: Position wird per JS gesetzt -->
           <line id="rollMarker" x1="6" x2="104" y1="300" y2="300" stroke="red" stroke-width="4"/>
         </g>
 
-        <!-- Kleiner Kreis näher an der Bahn; beide zusammen in der Mitte -->
-        <!-- Neu: Kreis weiter links bei x=220 -->
+        <!-- Kreis nahe der Bahn -->
         <g id="windCompass" transform="translate(220,150)">
           <circle r="60" fill="none" stroke="black" stroke-width="3"/>
-          <!-- Pfeil: Grundrichtung zeigt nach rechts -->
           <g id="windArrow" transform="rotate(0)">
             <line x1="-35" y1="0" x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             <line x1="18"  y1="-20" x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
@@ -256,8 +253,7 @@
       document.getElementById('result').textContent = 'Berechnung abgeschlossen.';
 
       /* Unteren Bereich sichtbar machen */
-      const bottom = document.getElementById('bottomLayout');
-      bottom.style.display = 'grid';
+      document.getElementById('bottomLayout').style.display = 'grid';
 
       /* Rollstrecke (aufgerundet) anzeigen */
       document.getElementById('rollValue').textContent =
@@ -291,20 +287,34 @@
       }
     }
 
-    // Rote Linie in der Bahn für Rollstrecke relativ zur Pistenlänge
+    // Rote Linie: geht über die Bahn hinaus; passt viewBox nach oben an, falls nötig
     function updateRunwayMarker(rollDistanceMeters, runwayLengthMeters) {
-      const h = 300;               // neue Höhe der gezeichneten Bahn im SVG
+      const svg = document.getElementById('viz');
+      const defaultVB = { x: 0, y: 0, w: 600, h: 300 };
+
+      const h = 300; // Höhe der gezeichneten Bahn im SVG
       const marker = document.getElementById('rollMarker');
       if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0) return;
 
-      // Verhältnis Rollstrecke / Pistenlänge, auf [0,1] begrenzen
-      const ratio = Math.max(0, Math.min(1, rollDistanceMeters / runwayLengthMeters));
+      // Verhältnis Rollstrecke / Pistenlänge (nur Untergrenze 0)
+      const ratio = Math.max(0, rollDistanceMeters / runwayLengthMeters);
 
-      // y=0 ist oben; wir wollen 0 m unten und L m oben -> invertierte Skala
-      const y = h - ratio * h;
+      // y=0 ist oben; 0 m unten und L m oben -> invertierte Skala
+      const y = h - ratio * h; // kann negativ werden -> über die Bahn hinaus
 
       marker.setAttribute('y1', y.toString());
       marker.setAttribute('y2', y.toString());
+
+      // Sichtbarkeit sicherstellen: wenn y < 0, ViewBox nach oben erweitern
+      if (y < 0) {
+        const margin = 20;
+        const minY = Math.floor(y - margin);         // nach oben erweitern (negativ)
+        const newH = defaultVB.h - minY;             // Gesamt-Höhe vergrößern
+        svg.setAttribute('viewBox', `${defaultVB.x} ${minY} ${defaultVB.w} ${newH}`);
+      } else {
+        // auf Standard zurücksetzen
+        svg.setAttribute('viewBox', `${defaultVB.x} ${defaultVB.y} ${defaultVB.w} ${defaultVB.h}`);
+      }
     }
   </script>
 </body>
