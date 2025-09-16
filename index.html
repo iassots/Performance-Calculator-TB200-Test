@@ -33,7 +33,7 @@
         value="15"
         min="-100"
         max="200"
-            />
+         />
 
     <label for="windSpeed">Windgeschwindigkeit (kt)</label>
       <input
@@ -64,7 +64,6 @@
       <option value="short-wet-grass-firm">
         Kurzes feuchtes Gras auf festem Gelände
       </option>
-      <option value="loose-surface">Lockeres Gelände, Schlamm oder Schnee</option>
     </select>
 
     <label for="runwayHeading">Pistenausrichtung (°)</label>
@@ -105,6 +104,7 @@
     <p id="w0">w_0: --</p>
     <p id="wPlus20">w_p20: --</p>
     <p id="sRoll">S_Roll: --</p>
+    <p id="surfaceDistance">Strecke nach Pistenart: --</p>
   </div>
 
   <script>
@@ -170,23 +170,23 @@
       ).textContent = `w_p20: ${wPlus20.toFixed(4)}`;
 
       const rollMinus20 =
-        0.0000000000000260 * Math.pow(pressureAltitude, 4) -
+        0.000000000000026 * Math.pow(pressureAltitude, 4) -
         0.0000000004166667 * Math.pow(pressureAltitude, 3) +
         0.0000030208333333 * Math.pow(pressureAltitude, 2) +
         0.0129166666666667 * pressureAltitude +
-        245.0000000000000000;
+        245;
       const roll0 =
         -0.0000000000000391 * Math.pow(pressureAltitude, 4) +
         0.0000000006770833 * Math.pow(pressureAltitude, 3) -
-        0.0000023437500000 * Math.pow(pressureAltitude, 2) +
+        0.00000234375 * Math.pow(pressureAltitude, 2) +
         0.0247916666666667 * pressureAltitude +
-        290.0000000000000000;
+        290;
       const rollPlus20 =
         -0.0000000000000651 * Math.pow(pressureAltitude, 4) +
-        0.0000000010937500 * Math.pow(pressureAltitude, 3) -
+        0.00000000109375 * Math.pow(pressureAltitude, 3) -
         0.0000041145833333 * Math.pow(pressureAltitude, 2) +
-        0.0318750000000000 * pressureAltitude +
-        340.0000000000000000;
+        0.031875 * pressureAltitude +
+        340;
       document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
       document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
       document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
@@ -195,6 +195,29 @@
         wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
       document.getElementById('sRoll').textContent =
         `S_Roll = w_m20 * Rollminus20 + w_0 * Roll0 + w_p20 * Rollplus20 = ${sRoll.toFixed(2)} m`;
+
+      const surfaceElement = document.getElementById('surface');
+      const surfaceValue = surfaceElement.value;
+      const surfaceMultipliers = {
+        asphalt: 1.1,
+        'hard-grass': 1.17,
+        'short-grass': 1.2,
+        'long-grass': 1.37,
+        'short-wet-grass-firm': 1.39,
+      };
+      const surfaceMultiplier = surfaceMultipliers[surfaceValue] ?? 1;
+      const surfaceAdjustedDistance = sRoll * surfaceMultiplier;
+      const multiplierText =
+        surfaceMultiplier === 1
+          ? ''
+          : ` * ${surfaceMultiplier.toLocaleString('de-DE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`;
+      const surfaceLabel = surfaceElement.options[surfaceElement.selectedIndex].text;
+      const surfaceFormulaText = `S_Roll${multiplierText} (${surfaceLabel})`;
+      document.getElementById('surfaceDistance').textContent =
+        `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
