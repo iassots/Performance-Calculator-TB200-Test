@@ -17,7 +17,7 @@
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
-  <p>Version 1.7</p>
+  <p>Version 1.8</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
       <input
@@ -315,7 +315,7 @@
       const arrow = document.getElementById('windArrow');
       if (arrow) {
         // 0° zeigt nach rechts Richtung Bahn; positive Werte im Uhrzeigersinn
-        arrow.setAttribute('transform', `rotate(${rel})`);
+        arrow.setAttribute('transform', `rotate(${(rel + 90) % 360})`);
       }
       const label = document.getElementById('vizLabel');
       if (label) {
