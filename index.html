@@ -10,133 +10,9 @@
     input, select { width: 200px; }
     #result { margin-top: 2rem; font-weight: bold; }
 
-    .visualization {
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 1rem;
-      width: 100%;
-    }
-
-    .visualization h2 {
-      margin: 0;
-    }
-
-    .visual-container {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .wind-indicator {
-      text-align: center;
-    }
-
-    .wind-indicator svg {
-      width: 160px;
-      height: 160px;
-      display: block;
-    }
-
-    .wind-circle {
-      fill: #f7f7f7;
-      stroke: #cfcfcf;
-      stroke-width: 4;
-    }
-
-    .wind-reference {
-      stroke: #b0b0b0;
-      stroke-dasharray: 6 6;
-      stroke-width: 3;
-    }
-
-    .wind-arrow {
-      transform-origin: 100px 100px;
-      transition: transform 0.4s ease;
-    }
-
-    .wind-arrow-shaft {
-      stroke: #1f4d90;
-      stroke-width: 8;
-      stroke-linecap: round;
-    }
-
-    .wind-arrow-head {
-      fill: #1f4d90;
-    }
-
-    .wind-difference-text {
-      font-weight: bold;
-      margin-top: 0.75rem;
-    }
-
-    .runway-visual {
-      width: 110px;
-    }
-
-    .runway {
-      position: relative;
-      width: 70px;
-      height: 220px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, #444, #555 45%, #3f3f3f);
-      box-shadow: inset 0 0 0 4px #2f2f2f;
-      margin: 0 auto;
-    }
-
-    .runway-centerline {
-      position: absolute;
-      top: 10%;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 6px;
-      background: repeating-linear-gradient(
-        to bottom,
-        #fff,
-        #fff 14px,
-        transparent 14px,
-        transparent 26px
-      );
-      border-radius: 4px;
-      opacity: 0.85;
-    }
-
-    .runway-threshold {
-      position: absolute;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      height: 18px;
-      border: 4px solid #fff;
-      border-top: none;
-      box-sizing: border-box;
-      opacity: 0.85;
-    }
-
-    .runway-label {
-      text-align: center;
-      margin-top: 0.5rem;
-      font-weight: bold;
-    }
-
-    @media (max-width: 768px) {
-      .visualization {
-        align-items: center;
-      }
-
-      .visual-container {
-        flex-direction: column;
-      }
-
-      .runway-visual {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-    }
+    /* --- nur für die Grafik --- */
+    #vizContainer { margin-top: 2rem; }
+    #vizLabel { margin-top: .5rem; }
   </style>
 </head>
 <body>
@@ -162,7 +38,55 @@
         min="-100"
         max="200"
       />
-@@ -86,53 +214,105 @@
+
+    <label for="windSpeed">Windgeschwindigkeit (kt)</label>
+      <input
+        type="number"
+        id="windSpeed"
+        name="windSpeed"
+        min="0"
+        max="100"
+      />
+
+    <label for="windDirection">Windrichtung (°)</label>
+      <input
+        type="number"
+        id="windDirection"
+        name="windDirection"
+        min="0"
+        max="360"
+      />
+
+    <label for="surface">Pistenoberfläche</label>
+    <select id="surface" name="surface">
+      <option value="grass">Gras</option>
+      <option value="asphalt">Asphalt</option>
+      <option value="concrete">Beton</option>
+      <option value="hard-grass">Harter Rasen</option>
+      <option value="short-grass">Kurzes Gras</option>
+      <option value="long-grass">Hohes Gras</option>
+      <option value="short-wet-grass-firm">
+        Kurzes feuchtes Gras auf festem Gelände
+      </option>
+    </select>
+
+    <label for="runwayHeading">Pistenausrichtung (°)</label>
+      <input
+        type="number"
+        id="runwayHeading"
+        name="runwayHeading"
+        value="55"
+        min="0"
+        max="360"
+      />
+
+    <label for="fieldElevation">Flugplatzhöhe (ft)</label>
+      <input
+        type="number"
+        id="fieldElevation"
+        name="fieldElevation"
+        value="1535"
+        min="0"
         max="15000"
       />
 
@@ -188,61 +112,33 @@
     <p id="windDistance">Strecke nach Wind: --</p>
   </div>
 
-  <div class="visualization">
+  <!-- === NEU: Grafische Darstellung am Seitenende === -->
+  <div id="vizContainer" aria-live="polite">
     <h2>Grafische Darstellung</h2>
-    <div class="visual-container">
-      <div class="wind-indicator">
-        <svg
-          viewBox="0 0 200 200"
-          role="img"
-          aria-labelledby="windVizTitle windVizDesc"
-        >
-          <title id="windVizTitle">Windrichtung relativ zur Pistenausrichtung</title>
-          <desc id="windVizDesc">
-            Ein Pfeil zeigt die Windrichtung relativ zur Ausrichtung der Piste.
-          </desc>
-          <circle cx="100" cy="100" r="90" class="wind-circle"></circle>
-          <line
-            x1="100"
-            y1="30"
-            x2="100"
-            y2="170"
-            class="wind-reference"
-          ></line>
-          <g id="windArrow" class="wind-arrow">
-            <line
-              x1="100"
-              y1="44"
-              x2="100"
-              y2="108"
-              class="wind-arrow-shaft"
-            ></line>
-            <polygon
-              points="100,24 86,56 114,56"
-              class="wind-arrow-head"
-            ></polygon>
-          </g>
-          <circle cx="100" cy="100" r="6" fill="#1f4d90" opacity="0.8"></circle>
-        </svg>
-        <p id="windDifferenceDisplay" class="wind-difference-text">
-          Relativer Wind zur Piste: --°
-        </p>
-      </div>
-      <div class="runway-visual">
-        <div class="runway" aria-hidden="true">
-          <div class="runway-centerline"></div>
-          <div class="runway-threshold"></div>
-        </div>
-        <p class="runway-label">Piste</p>
-      </div>
-    </div>
+    <svg id="viz" viewBox="0 0 600 300" width="100%" height="300" aria-label="Windrichtung relativ zur Piste">
+      <!-- Landebahn (immer senkrecht, rechts) -->
+      <g id="runway" transform="translate(420,20)">
+        <rect x="0" y="0" width="160" height="260" fill="white" stroke="black" stroke-width="3"/>
+        <line x1="80" y1="15" x2="80" y2="245" stroke="black" stroke-width="4" stroke-dasharray="22 18" />
+      </g>
+
+      <!-- Kreis mit Pfeil links von der Bahn -->
+      <g id="windCompass" transform="translate(120,150)">
+        <circle r="95" fill="none" stroke="black" stroke-width="4"/>
+        <!-- Pfeil: 0° zeigt nach rechts (zur Bahn) -->
+        <g id="windArrow" transform="rotate(0)">
+          <line x1="-55" y1="0" x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+          <line x1="30" y1="-28" x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+          <line x1="30" y1="28"  x2="70" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+        </g>
+      </g>
+    </svg>
+    <p id="vizLabel">Wind relativ zur Pistenachse: --</p>
   </div>
 
   <script>
     const perfForm = document.getElementById('perfForm');
     const surfaceSelect = document.getElementById('surface');
-    const windArrowElement = document.getElementById('windArrow');
-    const windDifferenceDisplay = document.getElementById('windDifferenceDisplay');
 
     Array.from(surfaceSelect.options).forEach((option) => {
       const optionText = option.textContent.trim().toLowerCase();
@@ -268,7 +164,110 @@
       }
       const temperature = parseFloat(document.getElementById('temperature').value) || 0;
       const qnh = parseFloat(document.getElementById('qnh').value) || 0;
-@@ -243,34 +423,56 @@
+      const fieldElevation =
+        parseFloat(document.getElementById('fieldElevation').value) || 0;
+      const pressureAltitude = (1013 - qnh) * 28 + fieldElevation;
+      const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
+      const windDirection =
+        parseFloat(document.getElementById('windDirection').value) || 0;
+      const runwayHeading =
+        parseFloat(document.getElementById('runwayHeading').value) || 0;
+
+      const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
+      const windComponent =
+        Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
+
+      document.getElementById(
+        'isaDeviation'
+      ).textContent = `ISA Abweichung: ${isaDeviation.toFixed(2)} \u00B0C`;
+      document.getElementById(
+        'windComponent'
+      ).textContent = `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
+      document.getElementById(
+        'calcPressureAltitude'
+      ).textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
+
+      const distanceISA0 =
+        0.000001339 * pressureAltitude * pressureAltitude +
+        0.01854 * pressureAltitude +
+        290.7;
+      document.getElementById(
+        'distancePressureAltitude'
+      ).textContent = `Strecke nach Druckhöhe (ISA=0): ${distanceISA0.toFixed(2)} m`;
+
+      const wMinus20 = (isaDeviation * (isaDeviation - 20)) / 800;
+      const w0 = (400 - Math.pow(isaDeviation, 2)) / 400;
+      const wPlus20 = (isaDeviation * (isaDeviation + 20)) / 800;
+
+      document.getElementById(
+        'wMinus20'
+      ).textContent = `w_m20: ${wMinus20.toFixed(4)}`;
+      document.getElementById('w0').textContent = `w_0: ${w0.toFixed(4)}`;
+      document.getElementById(
+        'wPlus20'
+      ).textContent = `w_p20: ${wPlus20.toFixed(4)}`;
+
+      const rollMinus20 =
+        0.000000000000026 * Math.pow(pressureAltitude, 4) -
+        0.0000000004166667 * Math.pow(pressureAltitude, 3) +
+        0.0000030208333333 * Math.pow(pressureAltitude, 2) +
+        0.0129166666666667 * pressureAltitude +
+        245;
+      const roll0 =
+        -0.0000000000000391 * Math.pow(pressureAltitude, 4) +
+        0.0000000006770833 * Math.pow(pressureAltitude, 3) -
+        0.00000234375 * Math.pow(pressureAltitude, 2) +
+        0.0247916666666667 * pressureAltitude +
+        290;
+      const rollPlus20 =
+        -0.0000000000000651 * Math.pow(pressureAltitude, 4) +
+        0.00000000109375 * Math.pow(pressureAltitude, 3) -
+        0.0000041145833333 * Math.pow(pressureAltitude, 2) +
+        0.031875 * Math.pow(pressureAltitude, 1) +
+        340;
+      document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
+      document.getElementById('roll0').textContent = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
+      document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
+
+      const sRoll =
+        wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
+      document.getElementById('sRoll').textContent =
+        `S_Roll = ${sRoll.toFixed(2)} m`;
+
+      const surfaceElement = document.getElementById('surface');
+      const surfaceValue = surfaceElement.value;
+      const surfaceMultipliers = {
+        asphalt: 1.1,
+        'hard-grass': 1.17,
+        'short-grass': 1.2,
+        'long-grass': 1.37,
+        'short-wet-grass-firm': 1.39,
+      };
+      const surfaceMultiplier = surfaceMultipliers[surfaceValue] ?? 1;
+      const surfaceAdjustedDistance = sRoll * surfaceMultiplier;
+      const multiplierText =
+        surfaceMultiplier === 1
+          ? ''
+          : ` * ${surfaceMultiplier.toLocaleString('de-DE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`;
+      const surfaceLabel = surfaceElement.options[surfaceElement.selectedIndex].text;
+      const surfaceFormulaText = `S_Roll${multiplierText} (${surfaceLabel})`;
+      document.getElementById('surfaceDistance').textContent =
+        `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
+
+      const denominator = windComponent > 0 ? 5 : 2.5;
+      const denominatorText = windComponent > 0 ? '5' : '2,5';
+      const factor = windComponent > 0 ? 0.2 : 0.15;
+      const factorText = windComponent > 0 ? '0,2' : '0,15';
+      const windMultiplierRaw =
+        1 - ((windComponent / denominator) * factor);
+      const windMultiplier = Math.max(0, windMultiplierRaw);
+      const componentText = windComponent.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
       const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString('de-DE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -295,33 +294,40 @@
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
 
-      if (windArrowElement) {
-        const rawDifference = ((windDirection - runwayHeading) % 360 + 360) % 360;
-        windArrowElement.style.transform = `rotate(${rawDifference}deg)`;
-        if (windDifferenceDisplay) {
-          const signedDifference =
-            rawDifference > 180 ? rawDifference - 360 : rawDifference;
-          const normalisedDifference =
-            Math.abs(signedDifference) < 0.5 ? 0 : signedDifference;
-          const sign = normalisedDifference > 0 ? '+' : '';
-          const formatted = `${sign}${normalisedDifference
-            .toFixed(0)
-            .replace('-', '−')}°`;
-          const directionLabel =
-            normalisedDifference === 0
-              ? ''
-              : normalisedDifference > 0
-              ? ' (von rechts)'
-              : ' (von links)';
-          windDifferenceDisplay.textContent = `Relativer Wind zur Piste: ${formatted}${directionLabel}`;
-        }
-      }
+      /* === NEU: Visualisierung nach der Berechnung aktualisieren === */
+      updateVisualization(windDirection, runwayHeading);
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
       const details = document.getElementById('details');
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
     });
+
+    /* === NEU: Hilfsfunktionen für die Visualisierung === */
+    function normalizeAngle(deg) {
+      // Ergebnis in [0, 360)
+      return ((deg % 360) + 360) % 360;
+    }
+
+    // Windpfeil relativ zur Pistenausrichtung (Differenz) drehen
+    function updateVisualization(windDirDeg, rwyDeg) {
+      const rel = normalizeAngle(windDirDeg - rwyDeg); // Pfeilrichtung relativ zur Piste
+      const arrow = document.getElementById('windArrow');
+      if (arrow) {
+        // 0° zeigt nach rechts Richtung Bahn; positive Werte im Uhrzeigersinn
+        arrow.setAttribute('transform', `rotate(${rel})`);
+      }
+      const label = document.getElementById('vizLabel');
+      if (label) {
+        label.textContent = `Wind relativ zur Pistenachse: ${rel.toFixed(0)}° (Wind ${normalizeAngle(windDirDeg)}°, Piste ${normalizeAngle(rwyDeg)}°)`;
+      }
+    }
+
+    // Initiale Darstellung (falls der Nutzer direkt scrollt)
+    updateVisualization(
+      parseFloat(document.getElementById('windDirection').value) || 0,
+      parseFloat(document.getElementById('runwayHeading').value) || 0
+    );
   </script>
 </body>
 </html>
