@@ -68,7 +68,7 @@
     <label for="fieldElevation">Flugplatzhöhe (ft)</label>
     <input type="number" id="fieldElevation" name="fieldElevation" value="1535" min="0" max="15000"/>
 
-    <!-- NEU: Pistenlänge -->
+    <!-- Pistenlänge -->
     <label for="runwayLength">Pistenlänge (m)</label>
     <input type="number" id="runwayLength" name="runwayLength" value="597" min="1" max="10000"/>
 
@@ -103,16 +103,18 @@
 
     <div id="vizContainer">
       <svg id="viz" viewBox="0 0 600 300" width="100%" height="300" aria-label="Windrichtung relativ zur Piste">
-        <!-- Landebahn (immer senkrecht, rechts) -->
-        <g id="runway" transform="translate(420,20)">
-          <rect x="0" y="0" width="160" height="260" fill="white" stroke="black" stroke-width="3"/>
-          <line x1="80" y1="15" x2="80" y2="245" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
-          <!-- NEU: Marker für Rollstrecke relativ zur Pistenlänge -->
-          <line id="rollMarker" x1="6" x2="154" y1="260" y2="260" stroke="red" stroke-width="4"/>
+        <!-- Landebahn (schmaler & länger, mittig mit Kreis weiter links) -->
+        <!-- Neu: schmaler (110), länger (300), weiter nach links (x=330) -->
+        <g id="runway" transform="translate(330,0)">
+          <rect x="0" y="0" width="110" height="300" fill="white" stroke="black" stroke-width="3"/>
+          <line x1="55" y1="10" x2="55" y2="290" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
+          <!-- Rote Linie: wird per JS vertikal positioniert -->
+          <line id="rollMarker" x1="6" x2="104" y1="300" y2="300" stroke="red" stroke-width="4"/>
         </g>
 
-        <!-- Kleiner Kreis nahe an der Bahn (links davon) -->
-        <g id="windCompass" transform="translate(360,150)">
+        <!-- Kleiner Kreis näher an der Bahn; beide zusammen in der Mitte -->
+        <!-- Neu: Kreis weiter links bei x=220 -->
+        <g id="windCompass" transform="translate(220,150)">
           <circle r="60" fill="none" stroke="black" stroke-width="3"/>
           <!-- Pfeil: Grundrichtung zeigt nach rechts -->
           <g id="windArrow" transform="rotate(0)">
@@ -289,9 +291,9 @@
       }
     }
 
-    // NEU: Rote Linie in der Bahn für Rollstrecke relativ zur Pistenlänge
+    // Rote Linie in der Bahn für Rollstrecke relativ zur Pistenlänge
     function updateRunwayMarker(rollDistanceMeters, runwayLengthMeters) {
-      const h = 260;               // Höhe der gezeichneten Bahn im SVG
+      const h = 300;               // neue Höhe der gezeichneten Bahn im SVG
       const marker = document.getElementById('rollMarker');
       if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0) return;
 
@@ -303,7 +305,6 @@
 
       marker.setAttribute('y1', y.toString());
       marker.setAttribute('y2', y.toString());
-      // Optional: Falls Rollstrecke > Pistenlänge, die Linie am oberen Rand belassen (durch clamp bereits so)
     }
   </script>
 </body>
