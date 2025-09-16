@@ -15,12 +15,8 @@
       display: none;            /* erst nach Berechnung sichtbar */
       margin-top: 2rem;
       align-items: center;
-      column-gap: 80px;
-      row-gap: 20px;
-    }
-    /* auf großen Screens nebeneinander, sonst untereinander */
-    @media (min-width: 900px) {
-      #bottomLayout { display: none; /* wird per JS auf grid gesetzt */ grid-template-columns: 1fr auto; }
+      gap: 80px;
+      grid-template-columns: 1fr auto;
     }
     #leftPane h2 {
       font-size: 2.2rem;
@@ -36,8 +32,7 @@
 
     /* Visualisierung (rechts) */
     #vizContainer { width: 600px; max-width: 100%; }
-    /* optionaler Label-Text ausblenden, um den Screenshot-Look zu treffen */
-    #vizLabel { display: none; }
+    #vizLabel { display: none; } /* optional ausblenden */
   </style>
 </head>
 <body>
@@ -73,6 +68,10 @@
     <label for="fieldElevation">Flugplatzhöhe (ft)</label>
     <input type="number" id="fieldElevation" name="fieldElevation" value="1535" min="0" max="15000"/>
 
+    <!-- NEU: Pistenlänge -->
+    <label for="runwayLength">Pistenlänge (m)</label>
+    <input type="number" id="runwayLength" name="runwayLength" value="597" min="1" max="10000"/>
+
     <button type="button" id="calcBtn">Berechnen</button>
     <button type="button" id="detailsBtn">Detaillierte Berechnung</button>
   </form>
@@ -95,22 +94,24 @@
     <p id="windDistance">Strecke nach Wind: --</p>
   </div>
 
-  <!-- Unterer Bereich im Screenshot-Look -->
+  <!-- Unterer Bereich: links Text, rechts Visual -->
   <section id="bottomLayout" aria-live="polite">
     <div id="leftPane">
       <h2>Ergebnis</h2>
       <p id="rollOutput">Rollstrecke: <span id="rollValue">--</span></p>
     </div>
 
-    <div id="vizContainer" aria-hidden="true">
+    <div id="vizContainer">
       <svg id="viz" viewBox="0 0 600 300" width="100%" height="300" aria-label="Windrichtung relativ zur Piste">
         <!-- Landebahn (immer senkrecht, rechts) -->
         <g id="runway" transform="translate(420,20)">
           <rect x="0" y="0" width="160" height="260" fill="white" stroke="black" stroke-width="3"/>
           <line x1="80" y1="15" x2="80" y2="245" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
+          <!-- NEU: Marker für Rollstrecke relativ zur Pistenlänge -->
+          <line id="rollMarker" x1="6" x2="154" y1="260" y2="260" stroke="red" stroke-width="4"/>
         </g>
 
-        <!-- Kleiner Kreis nahe an der Bahn (links davon, ca. 60px Abstand) -->
+        <!-- Kleiner Kreis nahe an der Bahn (links davon) -->
         <g id="windCompass" transform="translate(360,150)">
           <circle r="60" fill="none" stroke="black" stroke-width="3"/>
           <!-- Pfeil: Grundrichtung zeigt nach rechts -->
@@ -160,6 +161,7 @@
       const windSpeed = parseFloat(document.getElementById('windSpeed').value) || 0;
       const windDirection = parseFloat(document.getElementById('windDirection').value) || 0;
       const runwayHeading = parseFloat(document.getElementById('runwayHeading').value) || 0;
+      const runwayLength = parseFloat(document.getElementById('runwayLength').value) || 597;
 
       const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
       const windComponent = Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
@@ -251,14 +253,17 @@
 
       document.getElementById('result').textContent = 'Berechnung abgeschlossen.';
 
-      /* Unteren Bereich sichtbar machen und Werte setzen */
+      /* Unteren Bereich sichtbar machen */
       const bottom = document.getElementById('bottomLayout');
-      bottom.style.display = 'grid';   // wie im Screenshot: links Text, rechts Visual
+      bottom.style.display = 'grid';
+
+      /* Rollstrecke (aufgerundet) anzeigen */
       document.getElementById('rollValue').textContent =
         `${Math.ceil(windAdjustedDistance).toLocaleString('de-DE')} m`;
 
-      // Visual aktualisieren
+      /* Visuals updaten */
       updateVisualization(windDirection, runwayHeading);
+      updateRunwayMarker(windAdjustedDistance, runwayLength);
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -282,6 +287,23 @@
         label.textContent =
           `Wind relativ zur Pistenachse: ${rel.toFixed(0)}° (Wind ${normalizeAngle(windDirDeg)}°, Piste ${normalizeAngle(rwyDeg)}°)`;
       }
+    }
+
+    // NEU: Rote Linie in der Bahn für Rollstrecke relativ zur Pistenlänge
+    function updateRunwayMarker(rollDistanceMeters, runwayLengthMeters) {
+      const h = 260;               // Höhe der gezeichneten Bahn im SVG
+      const marker = document.getElementById('rollMarker');
+      if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0) return;
+
+      // Verhältnis Rollstrecke / Pistenlänge, auf [0,1] begrenzen
+      const ratio = Math.max(0, Math.min(1, rollDistanceMeters / runwayLengthMeters));
+
+      // y=0 ist oben; wir wollen 0 m unten und L m oben -> invertierte Skala
+      const y = h - ratio * h;
+
+      marker.setAttribute('y1', y.toString());
+      marker.setAttribute('y2', y.toString());
+      // Optional: Falls Rollstrecke > Pistenlänge, die Linie am oberen Rand belassen (durch clamp bereits so)
     }
   </script>
 </body>
