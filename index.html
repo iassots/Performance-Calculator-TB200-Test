@@ -30,7 +30,7 @@
         type="number"
         id="temperature"
         name="temperature"
-        value="15"
+       value="15"
         min="-100"
         max="200"
       />
@@ -105,10 +105,20 @@
     <p id="wPlus20">w_p20: --</p>
     <p id="sRoll">S_Roll: --</p>
     <p id="surfaceDistance">Strecke nach Pistenart: --</p>
+    <p id="windDistance">Strecke nach Wind: --</p>
   </div>
 
   <script>
     const perfForm = document.getElementById('perfForm');
+    const surfaceSelect = document.getElementById('surface');
+
+    Array.from(surfaceSelect.options).forEach((option) => {
+      const optionText = option.textContent.trim().toLowerCase();
+      if (option.value === 'grass' || optionText === 'gras') {
+        surfaceSelect.removeChild(option);
+      }
+    });
+
     perfForm.querySelectorAll('input[type="number"]').forEach((input) => {
       input.addEventListener('input', function () {
         const min = parseFloat(this.min);
@@ -218,6 +228,22 @@
       const surfaceFormulaText = `S_Roll${multiplierText} (${surfaceLabel})`;
       document.getElementById('surfaceDistance').textContent =
         `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
+
+      const rawWindMultiplier = 1 - windComponent * 0.01;
+      const windMultiplier = Math.max(0, rawWindMultiplier);
+      const windAdjustedDistance = sRoll * windMultiplier;
+      const windLabel = windComponent >= 0 ? 'Gegenwind' : 'Rückenwind';
+      const windComponentText = Math.abs(windComponent).toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const windMultiplierText = windMultiplier.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const windNote = windMultiplier === rawWindMultiplier ? '' : ' (auf 0 begrenzt)';
+      document.getElementById('windDistance').textContent =
+        `Strecke nach Wind: S_Roll * ${windMultiplierText} (${windLabel} ${windComponentText} kt) = ${windAdjustedDistance.toFixed(2)} m${windNote}`;
 
       const result = document.getElementById('result');
       result.textContent = 'Berechnung abgeschlossen.';
