@@ -231,10 +231,8 @@
         ` * ${surfaceMultiplier.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       const surfaceLabel = surfaceElement.options[surfaceElement.selectedIndex].text;
       const surfaceFormulaText = `S_Roll${multiplierText} (${surfaceLabel})`;
-document.getElementById('surfaceDistance').textContent =
-  `Strecke nach Pistenart: ${surfaceDistanceText} m`;
-
-
+      document.getElementById('surfaceDistance').textContent =
+        `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
 
       const denominator = windComponent > 0 ? 5 : 2.5;
       const denominatorText = windComponent > 0 ? '5' : '2,5';
@@ -254,8 +252,8 @@ document.getElementById('surfaceDistance').textContent =
           : 'Strecke nach Pistenart * (1 - ((Head/Tailwind Komponente / 2,5) * 0,15))';
       const resolvedFormula =
         `Strecke nach Pistenart * (1 - ((${componentText} / ${denominatorText}) * ${factorText}))`;
-    document.getElementById('windDistance').textContent =
-  `Strecke nach Wind: ${windAdjustedDistanceText} m`;
+      document.getElementById('windDistance').textContent =
+        `Strecke nach Wind: ${symbolicFormula} = ${resolvedFormula} = ${surfaceDistanceText} m * ${windMultiplierText} = ${windAdjustedDistanceText} m${windNote}`;
 
       document.getElementById('result').textContent = 'Berechnung abgeschlossen.';
 
