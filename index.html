@@ -125,16 +125,16 @@
               <line x1="18"  y1="20"  x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             </g>
 
-            <!-- Crosswind-Indikator UNTER dem Kreis, LINKS vom Headwind-Pfeil -->
-            <g id="crosswindIndicator" transform="translate(0,90)">
+            <!-- Crosswind-Indikator: ÜBER Headwind und RECHTS -->
+            <g id="crosswindIndicator" transform="translate(90,80)">
               <line id="crossArrow" x1="0" y1="0" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="crossHead1" x1="-32" y1="-8" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="crossHead2" x1="-32" y1="8"  x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <text id="crossText" x="-50" y="0" font-size="16" dominant-baseline="middle" text-anchor="end">--</text>
             </g>
 
-            <!-- Head-/Tailwind-Indikator UNTER dem Kreis (mittig) -->
-            <g id="windComponentIndicator" transform="translate(0,140)">
+            <!-- Head-/Tailwind-Indikator: etwas weiter unten (zentriert) -->
+            <g id="windComponentIndicator" transform="translate(0,115)">
               <line id="componentArrow" x1="0" y1="0" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="componentHead1" x1="-8" y1="32" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="componentHead2" x1="8"  y1="32" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
@@ -287,8 +287,8 @@
       /* Visuals updaten */
       updateVisualization(windDirection, runwayHeading);
       updateRunwayMarker(windAdjustedDistance, runwayLength);
-      updateWindComponentIndicator(windComponent);  // Head-/Tailwind (unten, mittig)
-      updateCrosswindIndicator(crosswindComponent); // Crosswind (unten, links davon)
+      updateWindComponentIndicator(windComponent);  // Head-/Tailwind (unten, mittig & tiefer)
+      updateCrosswindIndicator(crosswindComponent); // Crosswind (oben drüber, rechts)
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -375,7 +375,7 @@
       }
     }
 
-    // Crosswind-Pfeil + Wert UNTER dem Kreis, LINKS vom Headwind-Pfeil
+    // Crosswind-Pfeil + Wert (rechts vom Zentrum) ÜBER dem Headwind-Pfeil
     // Regel: sin(windDirection - runwayHeading) * windSpeed
     // > 0  => Wind von rechts => Pfeil nach LINKS
     // < 0  => Wind von links  => Pfeil nach RECHTS
