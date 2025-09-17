@@ -80,6 +80,7 @@
   <div id="details" style="display:none;">
     <p id="isaDeviation">ISA Abweichung: --</p>
     <p id="windComponent">Head/Tailwind Komponente: --</p>
+    <p id="crosswindComponent">Crosswind Komponente: --</p>
     <p id="calcPressureAltitude">Druckhöhe: --</p>
     <p id="distancePressureAltitude">Strecke nach Druckhöhe (ISA=0): --</p>
     <p id="rollMinus20">Rollstrecke -20: --</p>
@@ -106,25 +107,33 @@
         <!-- Gruppe beider Elemente zentriert: (0,0) links oben der SVG; Mittelpunkt x=300 -->
         <g id="vizGroup" transform="translate(300,0)">
           <!-- Landebahn: schmaler (110) & länger (300), mit Marker-Linie -->
-          <!-- Runway zentriert bei +70 relativ zum Gruppenmittelpunkt -->
           <g id="runway" transform="translate(15,0)">
-            <!-- 15 = +70 - (110/2) -->
             <rect x="0" y="0" width="110" height="300" fill="white" stroke="black" stroke-width="3"/>
             <line x1="55" y1="10" x2="55" y2="290" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
-            <!-- Rote Linie: Position per JS -->
             <line id="rollMarker" x1="6" x2="104" y1="300" y2="300" stroke="red" stroke-width="4"/>
           </g>
 
-          <!-- Kreis mit Pfeil: symmetrisch links bei -70 (nahe an Bahn) -->
+          <!-- Kreis, Windpfeil, Indikatoren -->
           <g id="windCompass" transform="translate(-70,150)">
+            <!-- Kreis -->
             <circle r="60" fill="none" stroke="black" stroke-width="3"/>
+
+            <!-- Windrichtung relativ zur Piste -->
             <g id="windArrow" transform="rotate(0)">
               <line x1="-35" y1="0" x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
               <line x1="18"  y1="-20" x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
               <line x1="18"  y1="20"  x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             </g>
 
-            <!-- Head-/Tailwind-Indikator unter dem Kreis -->
+            <!-- Crosswind-Indikator LINKS neben dem Kreis -->
+            <g id="crosswindIndicator" transform="translate(-90,0)">
+              <line id="crossArrow" x1="0" y1="0" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="crossHead1" x1="-32" y1="-8" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="crossHead2" x1="-32" y1="8"  x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <text id="crossText" x="-50" y="0" font-size="16" dominant-baseline="middle" text-anchor="end">--</text>
+            </g>
+
+            <!-- Head-/Tailwind-Indikator UNTER dem Kreis -->
             <g id="windComponentIndicator" transform="translate(0,90)">
               <line id="componentArrow" x1="0" y1="0" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="componentHead1" x1="-8" y1="32" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
@@ -176,10 +185,12 @@
       const runwayLength = parseFloat(document.getElementById('runwayLength').value) || 597;
 
       const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
-      const windComponent = Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
+      const windComponent = Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed; // Head/Tailwind
+      const crosswindComponent = Math.sin(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed; // Crosswind (Vorzeichen)
 
       document.getElementById('isaDeviation').textContent = `ISA Abweichung: ${isaDeviation.toFixed(2)} \u00B0C`;
       document.getElementById('windComponent').textContent = `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
+      document.getElementById('crosswindComponent').textContent = `Crosswind Komponente: ${crosswindComponent.toFixed(2)} kt`;
       document.getElementById('calcPressureAltitude').textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
 
       const distanceISA0 =
@@ -276,7 +287,8 @@
       /* Visuals updaten */
       updateVisualization(windDirection, runwayHeading);
       updateRunwayMarker(windAdjustedDistance, runwayLength);
-      updateWindComponentIndicator(windComponent); // <— NEU: Head-/Tailwind-Pfeil aktualisieren
+      updateWindComponentIndicator(windComponent);        // Head-/Tailwind-Indikator (unten)
+      updateCrosswindIndicator(crosswindComponent);       // Crosswind-Indikator (links)
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -311,28 +323,23 @@
       const marker = document.getElementById('rollMarker');
       if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0) return;
 
-      // Verhältnis Rollstrecke / Pistenlänge (ohne Ober-Clamp)
       const ratio = Math.max(0, rollDistanceMeters / runwayLengthMeters);
-
-      // y=0 oben; 0 m unten, L m oben -> invertiert
-      const y = h - ratio * h; // kann < 0 werden (über Bahn hinaus)
+      const y = h - ratio * h;
 
       marker.setAttribute('y1', y.toString());
       marker.setAttribute('y2', y.toString());
 
-      // ViewBox erweitern, wenn die Linie oberhalb der Bahn liegt
       if (y < 0) {
         const margin = 20;
         const minY = Math.floor(y - margin);
         const newH = defaultVB.h - minY;
         svg.setAttribute('viewBox', `${defaultVB.x} ${minY} ${defaultVB.w} ${newH}`);
       } else {
-        // Standard-ViewBox
         svg.setAttribute('viewBox', `${defaultVB.x} ${defaultVB.y} ${defaultVB.w} ${defaultVB.h}`);
       }
     }
 
-    // NEU: Head-/Tailwind-Pfeil + Wert unter dem Kreis
+    // Head-/Tailwind-Pfeil + Wert unter dem Kreis
     function updateWindComponentIndicator(componentKt) {
       const arrow = document.getElementById('componentArrow');
       const head1 = document.getElementById('componentHead1');
@@ -365,6 +372,55 @@
         arrow.setAttribute('stroke', 'red');
         head1.setAttribute('stroke', 'red');
         head2.setAttribute('stroke', 'red');
+      }
+    }
+
+    // Crosswind-Pfeil + Wert LINKS neben dem Kreis
+    // Regel: sin(windDirection - runwayHeading) * windSpeed
+    // > 0  => Wind von rechts => Pfeil nach LINKS
+    // < 0  => Wind von links  => Pfeil nach RECHTS
+    function updateCrosswindIndicator(crossKt) {
+      const arrow = document.getElementById('crossArrow');
+      const head1 = document.getElementById('crossHead1');
+      const head2 = document.getElementById('crossHead2');
+      const text  = document.getElementById('crossText');
+      if (!arrow || !head1 || !head2 || !text) return;
+
+      const valText = `${Math.abs(crossKt).toLocaleString('de-DE', { maximumFractionDigits: 2 })} kt`;
+      text.textContent = valText;
+
+      if (crossKt >= 0) {
+        // Wind von rechts: Pfeil zeigt nach LINKS
+        arrow.setAttribute('x1', '0');   arrow.setAttribute('x2', '-40');
+        arrow.setAttribute('y1', '0');   arrow.setAttribute('y2', '0');
+
+        head1.setAttribute('x1', '-32'); head1.setAttribute('y1', '-8');
+        head1.setAttribute('x2', '-40'); head1.setAttribute('y2', '0');
+        head2.setAttribute('x1', '-32'); head2.setAttribute('y1', '8');
+        head2.setAttribute('x2', '-40'); head2.setAttribute('y2', '0');
+
+        text.setAttribute('x', '-50');
+        text.setAttribute('text-anchor', 'end');
+
+        arrow.setAttribute('stroke', 'black');
+        head1.setAttribute('stroke', 'black');
+        head2.setAttribute('stroke', 'black');
+      } else {
+        // Wind von links: Pfeil zeigt nach RECHTS
+        arrow.setAttribute('x1', '0');   arrow.setAttribute('x2', '40');
+        arrow.setAttribute('y1', '0');   arrow.setAttribute('y2', '0');
+
+        head1.setAttribute('x1', '32');  head1.setAttribute('y1', '-8');
+        head1.setAttribute('x2', '40');  head1.setAttribute('y2', '0');
+        head2.setAttribute('x1', '32');  head2.setAttribute('y1', '8');
+        head2.setAttribute('x2', '40');  head2.setAttribute('y2', '0');
+
+        text.setAttribute('x', '50');
+        text.setAttribute('text-anchor', 'start');
+
+        arrow.setAttribute('stroke', 'black');
+        head1.setAttribute('stroke', 'black');
+        head2.setAttribute('stroke', 'black');
       }
     }
   </script>
