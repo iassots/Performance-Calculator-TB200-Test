@@ -123,6 +123,14 @@
               <line x1="18"  y1="-20" x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
               <line x1="18"  y1="20"  x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             </g>
+
+            <!-- Head-/Tailwind-Indikator unter dem Kreis -->
+            <g id="windComponentIndicator" transform="translate(0,90)">
+              <line id="componentArrow" x1="0" y1="0" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="componentHead1" x1="-8" y1="32" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="componentHead2" x1="8"  y1="32" x2="0" y2="40" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <text id="componentText" x="14" y="22" font-size="16" dominant-baseline="middle">--</text>
+            </g>
           </g>
         </g>
       </svg>
@@ -268,6 +276,7 @@
       /* Visuals updaten */
       updateVisualization(windDirection, runwayHeading);
       updateRunwayMarker(windAdjustedDistance, runwayLength);
+      updateWindComponentIndicator(windComponent); // <— NEU: Head-/Tailwind-Pfeil aktualisieren
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -320,6 +329,42 @@
       } else {
         // Standard-ViewBox
         svg.setAttribute('viewBox', `${defaultVB.x} ${defaultVB.y} ${defaultVB.w} ${defaultVB.h}`);
+      }
+    }
+
+    // NEU: Head-/Tailwind-Pfeil + Wert unter dem Kreis
+    function updateWindComponentIndicator(componentKt) {
+      const arrow = document.getElementById('componentArrow');
+      const head1 = document.getElementById('componentHead1');
+      const head2 = document.getElementById('componentHead2');
+      const text  = document.getElementById('componentText');
+      if (!arrow || !head1 || !head2 || !text) return;
+
+      const valText = `${Math.abs(componentKt).toLocaleString('de-DE', { maximumFractionDigits: 2 })} kt`;
+      text.textContent = valText;
+
+      if (componentKt >= 0) {
+        // HEADWIND: Pfeil NACH UNTEN, schwarz
+        arrow.setAttribute('y1', '0');  arrow.setAttribute('y2', '40');
+        head1.setAttribute('x1', '-8'); head1.setAttribute('y1', '32');
+        head1.setAttribute('x2', '0');  head1.setAttribute('y2', '40');
+        head2.setAttribute('x1', '8');  head2.setAttribute('y1', '32');
+        head2.setAttribute('x2', '0');  head2.setAttribute('y2', '40');
+
+        arrow.setAttribute('stroke', 'black');
+        head1.setAttribute('stroke', 'black');
+        head2.setAttribute('stroke', 'black');
+      } else {
+        // TAILWIND: Pfeil NACH OBEN, rot
+        arrow.setAttribute('y1', '40'); arrow.setAttribute('y2', '0');
+        head1.setAttribute('x1', '-8'); head1.setAttribute('y1', '8');
+        head1.setAttribute('x2', '0');  head1.setAttribute('y2', '0');
+        head2.setAttribute('x1', '8');  head2.setAttribute('y1', '8');
+        head2.setAttribute('x2', '0');  head2.setAttribute('y2', '0');
+
+        arrow.setAttribute('stroke', 'red');
+        head1.setAttribute('stroke', 'red');
+        head2.setAttribute('stroke', 'red');
       }
     }
   </script>
