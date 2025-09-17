@@ -7,8 +7,8 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 2rem; }
     label { display: block; margin-top: 1rem; }
-    input, select, button { width: 200px; }
-    #result { margin-top: 1rem; font-weight: bold; }
+    input, select { width: 200px; }
+    #result { margin-top: 2rem; font-weight: bold; }
 
     /* Unterer Bereich: Ergebnis oben, Grafik zentriert darunter */
     #bottomLayout{
@@ -36,8 +36,7 @@
 </head>
 <body>
   <h1>TB200 Performance Calculator</h1>
-  <p>Version 1.8</p>
-
+  <p>Version 1.7</p>
   <form id="perfForm">
     <label for="qnh">QNH (hPa)</label>
     <input type="number" id="qnh" name="qnh" value="1013" min="700" max="1300"/>
@@ -68,20 +67,17 @@
     <label for="fieldElevation">Flugplatzhöhe (ft)</label>
     <input type="number" id="fieldElevation" name="fieldElevation" value="1535" min="0" max="15000"/>
 
+    <!-- Pistenlänge -->
     <label for="runwayLength">Pistenlänge (m)</label>
     <input type="number" id="runwayLength" name="runwayLength" value="597" min="1" max="10000"/>
 
-    <div style="margin-top:1rem; display:flex; gap:12px; flex-wrap:wrap;">
-      <button type="button" id="calcBtn">Berechnen</button>
-      <button type="button" id="detailsBtn">Detaillierte Berechnung</button>
-      <!-- NEU: Autofill -->
-      <button type="button" id="autoBtn">Wetter automatisch einfügen</button>
-    </div>
+    <button type="button" id="calcBtn">Berechnen</button>
+    <button type="button" id="detailsBtn">Detaillierte Berechnung</button>
   </form>
 
   <div id="result"></div>
 
-  <div id="details" style="display:none; margin-top:1rem;">
+  <div id="details" style="display:none;">
     <p id="isaDeviation">ISA Abweichung: --</p>
     <p id="windComponent">Head/Tailwind Komponente: --</p>
     <p id="calcPressureAltitude">Druckhöhe: --</p>
@@ -110,8 +106,9 @@
         <!-- Gruppe beider Elemente zentriert: (0,0) links oben der SVG; Mittelpunkt x=300 -->
         <g id="vizGroup" transform="translate(300,0)">
           <!-- Landebahn: schmaler (110) & länger (300), mit Marker-Linie -->
-          <!-- Runway zentriert: Mitte 70px rechts der Center-Achse; 110/2=55 -> 70-55 = 15 -->
+          <!-- Runway zentriert bei +70 relativ zum Gruppenmittelpunkt -->
           <g id="runway" transform="translate(15,0)">
+            <!-- 15 = +70 - (110/2) -->
             <rect x="0" y="0" width="110" height="300" fill="white" stroke="black" stroke-width="3"/>
             <line x1="55" y1="10" x2="55" y2="290" stroke="black" stroke-width="4" stroke-dasharray="22 18"/>
             <!-- Rote Linie: Position per JS -->
@@ -131,6 +128,18 @@
       </svg>
       <p id="vizLabel">Wind relativ zur Pistenachse: --</p>
     </div>
+  </section>
+
+  <!-- NEU: Nur anzeigen – Holfuy iFrame unter deiner Grafik -->
+  <section style="margin-top:2rem;">
+    <h2>Aktuelles Wetter (Holfuy Station 1185)</h2>
+    <iframe
+      src="https://holfuy.com/en/weather/1185"
+      width="420"
+      height="600"
+      style="border:1px solid #ccc; max-width:100%;"
+      loading="lazy">
+    </iframe>
   </section>
 
   <script>
@@ -171,11 +180,15 @@
       const runwayLength = parseFloat(document.getElementById('runwayLength').value) || 597;
 
       const isaDeviation = temperature - (15 - (pressureAltitude / 1000) * 2);
-      const windComponent = Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
+      const windComponent =
+        Math.cos(((windDirection - runwayHeading) * Math.PI) / 180) * windSpeed;
 
-      document.getElementById('isaDeviation').textContent = `ISA Abweichung: ${isaDeviation.toFixed(2)} \u00B0C`;
-      document.getElementById('windComponent').textContent = `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
-      document.getElementById('calcPressureAltitude').textContent = `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
+      document.getElementById('isaDeviation').textContent =
+        `ISA Abweichung: ${isaDeviation.toFixed(2)} \u00B0C`;
+      document.getElementById('windComponent').textContent =
+        `Head/Tailwind Komponente: ${windComponent.toFixed(2)} kt`;
+      document.getElementById('calcPressureAltitude').textContent =
+        `Druckhöhe: ${pressureAltitude.toFixed(0)} ft`;
 
       const distanceISA0 =
         0.000001339 * pressureAltitude * pressureAltitude +
@@ -211,12 +224,16 @@
         0.031875 * pressureAltitude +
         340;
 
-      document.getElementById('rollMinus20').textContent = `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
-      document.getElementById('roll0').textContent   = `Rollstrecke 0: ${roll0.toFixed(2)} m`;
-      document.getElementById('rollPlus20').textContent = `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
+      document.getElementById('rollMinus20').textContent =
+        `Rollstrecke -20: ${rollMinus20.toFixed(2)} m`;
+      document.getElementById('roll0').textContent =
+        `Rollstrecke 0: ${roll0.toFixed(2)} m`;
+      document.getElementById('rollPlus20').textContent =
+        `Rollstrecke +20: ${rollPlus20.toFixed(2)} m`;
 
       const sRoll = wMinus20 * rollMinus20 + w0 * roll0 + wPlus20 * rollPlus20;
-      document.getElementById('sRoll').textContent = `S_Roll = ${sRoll.toFixed(2)} m`;
+      document.getElementById('sRoll').textContent =
+        `S_Roll = ${sRoll.toFixed(2)} m`;
 
       const surfaceElement = document.getElementById('surface');
       const surfaceValue = surfaceElement.value;
@@ -230,9 +247,14 @@
       const surfaceMultiplier = surfaceMultipliers[surfaceValue] ?? 1;
       const surfaceAdjustedDistance = sRoll * surfaceMultiplier;
       const multiplierText =
-        surfaceMultiplier === 1 ? '' :
-        ` * ${surfaceMultiplier.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      const surfaceLabel = surfaceElement.options[surfaceElement.selectedIndex].text;
+        surfaceMultiplier === 1
+          ? ''
+          : ` * ${surfaceMultiplier.toLocaleString('de-DE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`;
+      const surfaceLabel =
+        surfaceElement.options[surfaceElement.selectedIndex].text;
       const surfaceFormulaText = `S_Roll${multiplierText} (${surfaceLabel})`;
       document.getElementById('surfaceDistance').textContent =
         `Strecke nach Pistenart: ${surfaceFormulaText} = ${surfaceAdjustedDistance.toFixed(2)} m`;
@@ -241,24 +263,37 @@
       const denominatorText = windComponent > 0 ? '5' : '2,5';
       const factor = windComponent > 0 ? 0.2 : 0.15;
       const factorText = windComponent > 0 ? '0,2' : '0,15';
-      const windMultiplierRaw = 1 - ((windComponent / denominator) * factor);
+      const windMultiplierRaw = 1 - (windComponent / denominator) * factor;
       const windMultiplier = Math.max(0, windMultiplierRaw);
-      const componentText = windComponent.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const windMultiplierText = windMultiplier.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const componentText = windComponent.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const surfaceDistanceText = surfaceAdjustedDistance.toLocaleString(
+        'de-DE',
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      );
+      const windMultiplierText = windMultiplier.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
       const windAdjustedDistance = surfaceAdjustedDistance * windMultiplier;
-      const windAdjustedDistanceText = windAdjustedDistance.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const windNote = windMultiplier === windMultiplierRaw ? '' : ' (auf 0 begrenzt)';
+      const windAdjustedDistanceText = windAdjustedDistance.toLocaleString(
+        'de-DE',
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      );
+      const windNote =
+        windMultiplier === windMultiplierRaw ? '' : ' (auf 0 begrenzt)';
       const symbolicFormula =
         windComponent > 0
           ? 'Strecke nach Pistenart * (1 - ((Head/Tailwind Komponente / 5) * 0,2))'
           : 'Strecke nach Pistenart * (1 - ((Head/Tailwind Komponente / 2,5) * 0,15))';
-      const resolvedFormula =
-        `Strecke nach Pistenart * (1 - ((${componentText} / ${denominatorText}) * ${factorText}))`;
+      const resolvedFormula = `Strecke nach Pistenart * (1 - ((${componentText} / ${denominatorText}) * ${factorText}))`;
       document.getElementById('windDistance').textContent =
         `Strecke nach Wind: ${symbolicFormula} = ${resolvedFormula} = ${surfaceDistanceText} m * ${windMultiplierText} = ${windAdjustedDistanceText} m${windNote}`;
 
-      document.getElementById('result').textContent = 'Berechnung abgeschlossen.';
+      document.getElementById('result').textContent =
+        'Berechnung abgeschlossen.';
 
       /* Unteren Bereich sichtbar machen */
       const bottom = document.getElementById('bottomLayout');
@@ -273,13 +308,17 @@
       updateRunwayMarker(windAdjustedDistance, runwayLength);
     });
 
-    document.getElementById('detailsBtn').addEventListener('click', function () {
-      const details = document.getElementById('details');
-      details.style.display = details.style.display === 'none' ? 'block' : 'none';
-    });
+    document
+      .getElementById('detailsBtn')
+      .addEventListener('click', function () {
+        const details = document.getElementById('details');
+        details.style.display = details.style.display === 'none' ? 'block' : 'none';
+      });
 
     /* Visualisierungs-Helpers */
-    function normalizeAngle(deg) { return ((deg % 360) + 360) % 360; }
+    function normalizeAngle(deg) {
+      return ((deg % 360) + 360) % 360;
+    }
 
     // Pfeil zeigt Differenz: 0° -> unten, 180° -> oben
     function updateVisualization(windDirDeg, rwyDeg) {
@@ -291,8 +330,11 @@
       }
       const label = document.getElementById('vizLabel');
       if (label) {
-        label.textContent =
-          `Wind relativ zur Pistenachse: ${rel.toFixed(0)}° (Wind ${normalizeAngle(windDirDeg)}°, Piste ${normalizeAngle(rwyDeg)}°)`;
+        label.textContent = `Wind relativ zur Pistenachse: ${rel.toFixed(
+          0
+        )}° (Wind ${normalizeAngle(windDirDeg)}°, Piste ${normalizeAngle(
+          rwyDeg
+        )}°)`;
       }
     }
 
@@ -303,7 +345,8 @@
 
       const h = 300; // Höhe der gezeichneten Bahn
       const marker = document.getElementById('rollMarker');
-      if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0) return;
+      if (!marker || !isFinite(runwayLengthMeters) || runwayLengthMeters <= 0)
+        return;
 
       // Verhältnis Rollstrecke / Pistenlänge (ohne Ober-Clamp)
       const ratio = Math.max(0, rollDistanceMeters / runwayLengthMeters);
@@ -322,67 +365,12 @@
         svg.setAttribute('viewBox', `${defaultVB.x} ${minY} ${defaultVB.w} ${newH}`);
       } else {
         // Standard-ViewBox
-        svg.setAttribute('viewBox', `${defaultVB.x} ${defaultVB.y} ${defaultVB.w} ${defaultVB.h}`);
-      }
-    }
-
-    /* === Autofill: Wind & QNH über Open-Meteo === */
-    async function autoFillFromWeather() {
-      try {
-        const { lat, lon } = await getCoords();
-        const url =
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-          `&current=wind_speed_10m,wind_direction_10m,pressure_msl` +
-          `&wind_speed_unit=kn`;
-
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const cur = data?.current;
-        if (!cur) throw new Error('Keine aktuellen Wetterdaten');
-
-        const windDir = cur.wind_direction_10m;
-        const windSpd = cur.wind_speed_10m;    // kt
-        const qnhHpa = cur.pressure_msl;       // hPa ~ QNH
-
-        if (isFinite(windDir)) {
-          document.getElementById('windDirection').value =
-            Math.round(((windDir % 360) + 360) % 360);
-        }
-        if (isFinite(windSpd)) {
-          document.getElementById('windSpeed').value = Math.round(windSpd);
-        }
-        if (isFinite(qnhHpa)) {
-          document.getElementById('qnh').value = Math.round(qnhHpa);
-        }
-
-        const result = document.getElementById('result');
-        if (result) result.textContent = 'Wetter eingefügt. Prüfe & klicke dann auf „Berechnen“.';
-      } catch (err) {
-        console.error(err);
-        alert('Konnte Wetter nicht laden. Erlaube Standortzugriff oder versuche es erneut (HTTPS/localhost).');
-      }
-    }
-
-    function getCoords() {
-      return new Promise((resolve, reject) => {
-        if (!('geolocation' in navigator)) {
-          reject(new Error('Geolocation nicht verfügbar'));
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(
-          pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-          err => reject(err),
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+        svg.setAttribute(
+          'viewBox',
+          `${defaultVB.x} ${defaultVB.y} ${defaultVB.w} ${defaultVB.h}`
         );
-      });
+      }
     }
-
-    // Klick-Handler für Auto-Button
-    window.addEventListener('DOMContentLoaded', () => {
-      const autoBtn = document.getElementById('autoBtn');
-      if (autoBtn) autoBtn.addEventListener('click', autoFillFromWeather);
-    });
   </script>
 </body>
 </html>
