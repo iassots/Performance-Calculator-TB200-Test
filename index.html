@@ -125,11 +125,12 @@
               <line x1="18"  y1="20"  x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             </g>
 
-            <!-- Crosswind-Indikator: ÜBER Headwind -->
+            <!-- Crosswind-Indikator: ÜBER Headwind; Pfeil mittig gespiegelt -->
             <g id="crosswindIndicator" transform="translate(0,80)">
-              <line id="crossArrow" x1="0" y1="0" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
-              <line id="crossHead1" x1="-32" y1="-8" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
-              <line id="crossHead2" x1="-32" y1="8"  x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <!-- Initial: nach links zeigend, Länge 40 (±20) -->
+              <line id="crossArrow" x1="20" y1="0" x2="-20" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="crossHead1" x1="-12" y1="-8" x2="-20" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
+              <line id="crossHead2" x1="-12" y1="8"  x2="-20" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <text id="crossText" x="-50" y="0" font-size="16" dominant-baseline="middle" text-anchor="end">--</text>
             </g>
 
@@ -203,10 +204,6 @@
       const wMinus20 = (isaDeviation * (isaDeviation - 20)) / 800;
       const w0 = (400 - Math.pow(isaDeviation, 2)) / 400;
       const wPlus20 = (isaDeviation * (isaDeviation + 20)) / 800;
-
-      document.getElementById('wMinus20').textContent = `w_m20: ${wMinus20.toFixed(4)}`;
-      document.getElementById('w0').textContent = `w_0: ${w0.toFixed(4)}`;
-      document.getElementById('wPlus20').textContent = `w_p20: ${wPlus20.toFixed(4)}`;
 
       const rollMinus20 =
         0.000000000000026 * Math.pow(pressureAltitude, 4) -
@@ -288,7 +285,7 @@
       updateVisualization(windDirection, runwayHeading);
       updateRunwayMarker(windAdjustedDistance, runwayLength);
       updateWindComponentIndicator(windComponent);  // Head-/Tailwind (unten, mittig)
-      updateCrosswindIndicator(crosswindComponent); // Crosswind (oben drüber)
+      updateCrosswindIndicator(crosswindComponent); // Crosswind (oben drüber, mittig gespiegelt)
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -375,10 +372,10 @@
       }
     }
 
-    // Crosswind-Pfeil + Wert (immer links vom Pfeil)
+    // Crosswind-Pfeil + Wert (immer links vom Pfeil) — mittig gespiegelt
     // Regel: sin(windDirection - runwayHeading) * windSpeed
-    // > 0  => Wind von rechts => Pfeil nach LINKS
-    // < 0  => Wind von links  => Pfeil nach RECHTS
+    // > 0  => Wind von rechts => Pfeil nach LINKS (x1=+20 -> x2=-20)
+    // < 0  => Wind von links  => Pfeil nach RECHTS (x1=-20 -> x2=+20)
     function updateCrosswindIndicator(crossKt) {
       const arrow = document.getElementById('crossArrow');
       const head1 = document.getElementById('crossHead1');
@@ -394,27 +391,27 @@
       text.setAttribute('text-anchor', 'end');
 
       if (crossKt >= 0) {
-        // Wind von rechts: Pfeil zeigt nach LINKS
-        arrow.setAttribute('x1', '0');   arrow.setAttribute('x2', '-40');
-        arrow.setAttribute('y1', '0');   arrow.setAttribute('y2', '0');
+        // Wind von rechts: Pfeil zeigt nach LINKS (um die Mitte gespiegelt)
+        arrow.setAttribute('x1', '20');   arrow.setAttribute('x2', '-20');
+        arrow.setAttribute('y1', '0');    arrow.setAttribute('y2', '0');
 
-        head1.setAttribute('x1', '-32'); head1.setAttribute('y1', '-8');
-        head1.setAttribute('x2', '-40'); head1.setAttribute('y2', '0');
-        head2.setAttribute('x1', '-32'); head2.setAttribute('y1', '8');
-        head2.setAttribute('x2', '-40'); head2.setAttribute('y2', '0');
+        head1.setAttribute('x1', '-12');  head1.setAttribute('y1', '-8');
+        head1.setAttribute('x2', '-20');  head1.setAttribute('y2', '0');
+        head2.setAttribute('x1', '-12');  head2.setAttribute('y1', '8');
+        head2.setAttribute('x2', '-20');  head2.setAttribute('y2', '0');
 
         arrow.setAttribute('stroke', 'black');
         head1.setAttribute('stroke', 'black');
         head2.setAttribute('stroke', 'black');
       } else {
-        // Wind von links: Pfeil zeigt nach RECHTS
-        arrow.setAttribute('x1', '0');   arrow.setAttribute('x2', '40');
-        arrow.setAttribute('y1', '0');   arrow.setAttribute('y2', '0');
+        // Wind von links: Pfeil zeigt nach RECHTS (ebenfalls um die Mitte gespiegelt)
+        arrow.setAttribute('x1', '-20');  arrow.setAttribute('x2', '20');
+        arrow.setAttribute('y1', '0');    arrow.setAttribute('y2', '0');
 
-        head1.setAttribute('x1', '32');  head1.setAttribute('y1', '-8');
-        head1.setAttribute('x2', '40');  head1.setAttribute('y2', '0');
-        head2.setAttribute('x1', '32');  head2.setAttribute('y1', '8');
-        head2.setAttribute('x2', '40');  head2.setAttribute('y2', '0');
+        head1.setAttribute('x1', '12');   head1.setAttribute('y1', '-8');
+        head1.setAttribute('x2', '20');   head1.setAttribute('y2', '0');
+        head2.setAttribute('x1', '12');   head2.setAttribute('y1', '8');
+        head2.setAttribute('x2', '20');   head2.setAttribute('y2', '0');
 
         arrow.setAttribute('stroke', 'black');
         head1.setAttribute('stroke', 'black');
