@@ -125,7 +125,7 @@
               <line x1="18"  y1="20"  x2="45"  y2="0" stroke="black" stroke-width="5" stroke-linecap="round"/>
             </g>
 
-            <!-- Crosswind-Indikator: ÜBER Headwind und RECHTS -->
+            <!-- Crosswind-Indikator: ÜBER Headwind -->
             <g id="crosswindIndicator" transform="translate(0,80)">
               <line id="crossArrow" x1="0" y1="0" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
               <line id="crossHead1" x1="-32" y1="-8" x2="-40" y2="0" stroke="black" stroke-width="6" stroke-linecap="round"/>
@@ -287,8 +287,8 @@
       /* Visuals updaten */
       updateVisualization(windDirection, runwayHeading);
       updateRunwayMarker(windAdjustedDistance, runwayLength);
-      updateWindComponentIndicator(windComponent);  // Head-/Tailwind (unten, mittig & tiefer)
-      updateCrosswindIndicator(crosswindComponent); // Crosswind (oben drüber, rechts)
+      updateWindComponentIndicator(windComponent);  // Head-/Tailwind (unten, mittig)
+      updateCrosswindIndicator(crosswindComponent); // Crosswind (oben drüber)
     });
 
     document.getElementById('detailsBtn').addEventListener('click', function () {
@@ -375,7 +375,7 @@
       }
     }
 
-    // Crosswind-Pfeil + Wert (rechts vom Zentrum) ÜBER dem Headwind-Pfeil
+    // Crosswind-Pfeil + Wert (immer links vom Pfeil)
     // Regel: sin(windDirection - runwayHeading) * windSpeed
     // > 0  => Wind von rechts => Pfeil nach LINKS
     // < 0  => Wind von links  => Pfeil nach RECHTS
@@ -389,6 +389,10 @@
       const valText = `${Math.abs(crossKt).toLocaleString('de-DE', { maximumFractionDigits: 2 })} kt`;
       text.textContent = valText;
 
+      // Text immer LINKS vom Pfeil:
+      text.setAttribute('x', '-50');
+      text.setAttribute('text-anchor', 'end');
+
       if (crossKt >= 0) {
         // Wind von rechts: Pfeil zeigt nach LINKS
         arrow.setAttribute('x1', '0');   arrow.setAttribute('x2', '-40');
@@ -398,9 +402,6 @@
         head1.setAttribute('x2', '-40'); head1.setAttribute('y2', '0');
         head2.setAttribute('x1', '-32'); head2.setAttribute('y1', '8');
         head2.setAttribute('x2', '-40'); head2.setAttribute('y2', '0');
-
-        text.setAttribute('x', '-50');
-        text.setAttribute('text-anchor', 'end');
 
         arrow.setAttribute('stroke', 'black');
         head1.setAttribute('stroke', 'black');
@@ -414,9 +415,6 @@
         head1.setAttribute('x2', '40');  head1.setAttribute('y2', '0');
         head2.setAttribute('x1', '32');  head2.setAttribute('y1', '8');
         head2.setAttribute('x2', '40');  head2.setAttribute('y2', '0');
-
-        text.setAttribute('x', '50');
-        text.setAttribute('text-anchor', 'start');
 
         arrow.setAttribute('stroke', 'black');
         head1.setAttribute('stroke', 'black');
